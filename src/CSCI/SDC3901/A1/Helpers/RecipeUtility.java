@@ -2,7 +2,6 @@ package CSCI.SDC3901.A1.Helpers;
 
 import CSCI.SDC3901.A1.Ingredient;
 import CSCI.SDC3901.A1.UnitConversionData;
-import CSCI.SDC3901.A1.UnitData;
 
 import java.math.BigInteger;
 
@@ -18,8 +17,6 @@ public class RecipeUtility {
     public static boolean isVarianceGood(double varianceThresholdPercentage, Double existingSize1, Double existingSize2, Double size1, Double size2) {
         double minRange = 0.0;
         double maxRange = 0.0;
-
-        //todo: wrong implementation - revisit
 
         double xFactor = (existingSize2 * 1.0)/size2;
 
@@ -61,7 +58,7 @@ public class RecipeUtility {
         if (roundedQuantity != 0.0) mixedFraction = ((int)roundedQuantity) + " ";
         if (numerator != 0.0) {
             long denominator = conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(index);
-            int gcd = BigInteger.valueOf((long)numerator).gcd(BigInteger.valueOf(denominator)).intValue();
+            int gcd = BigInteger.valueOf((long)numerator).gcd(BigInteger.valueOf(denominator)).intValue(); //taken from : https://stackoverflow.com/a/4009230
             if (gcd != 1) {
                 numerator /= gcd;
                 denominator /= gcd;

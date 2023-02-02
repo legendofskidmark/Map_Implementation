@@ -5,7 +5,7 @@ public class Ingredient {
     private String units;
     private String name;
     private String quantityRepresentation = "";
-
+    boolean isVarianceAllowed;
     Ingredient(double quantity, String units, String name) {
         this.quantity = quantity;
         this.units = units;
@@ -30,6 +30,10 @@ public class Ingredient {
 
     public void setQuantityRepresentation(String quantityRepresentation) {
         this.quantityRepresentation = quantityRepresentation;
+    }
+
+    public void setVarianceAllowed(boolean varianceAllowed) {
+        isVarianceAllowed = varianceAllowed;
     }
 
     @Override
