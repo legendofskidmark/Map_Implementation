@@ -9,6 +9,11 @@ public class RecipeBookContent {
     private String title;
     private ArrayList<Ingredient> ingredients;
     private String instructions;
+    private RecipeBookContent recipeCopy;
+
+    RecipeBookContent(RecipeBookContent recipe) { //src : https://stackoverflow.com/a/869078
+        this.recipeCopy = recipe;
+    }
 
     RecipeBookContent(String givenSystemName, String title, ArrayList<Ingredient> ingredients, String instructions) {
         this.givenSystemName = givenSystemName;
@@ -31,5 +36,9 @@ public class RecipeBookContent {
 
     public String getInstructions() {
         return instructions;
+    }
+
+    public RecipeBookContent getRecipeCopy() {
+        return recipeCopy;
     }
 }

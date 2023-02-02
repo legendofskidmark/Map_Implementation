@@ -1,8 +1,8 @@
 package CSCI.SDC3901.A1.Helpers;
 
 import CSCI.SDC3901.A1.Ingredient;
+import CSCI.SDC3901.A1.MeasurementSystemParams;
 import CSCI.SDC3901.A1.RecipeBookContent;
-import CSCI.SDC3901.A1.UnitConversionData;
 
 import java.io.PrintWriter;
 import java.math.BigInteger;
@@ -35,31 +35,31 @@ public class RecipeUtility {
         }
     }
 
-    public static String getIntegerRepresentation(UnitConversionData conversionNodeData, Ingredient finalUnit, double quantity, int index) {
+    public static String getIntegerRepresentation(MeasurementSystemParams conversionNodeData, Ingredient finalUnit, double quantity, int index) {
         String integerRepresentation;
-        if (quantity <= conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(index)) { //i1
-            integerRepresentation = conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(index) + "";
+        if (quantity <= conversionNodeData.getFractionIntegers().get(index)) { //i1
+            integerRepresentation = conversionNodeData.getFractionIntegers().get(index) + "";
             finalUnit.setQuantityRepresentation(integerRepresentation);
         } else {
-            double multiple = quantity / conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(index);
+            double multiple = quantity / conversionNodeData.getFractionIntegers().get(index);
             multiple = Math.ceil(multiple);
-            multiple = multiple * conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(index);
+            multiple = multiple * conversionNodeData.getFractionIntegers().get(index);
             integerRepresentation = (int)multiple + "";
         }
         return integerRepresentation;
     }
 
-    public static String getMixedFraction(UnitConversionData conversionNodeData, double quantity, int index) {
+    public static String getMixedFraction(MeasurementSystemParams conversionNodeData, double quantity, int index) {
         double roundedQuantity = Math.floor(quantity);
         double decimalPart = quantity - roundedQuantity;
         //if decimal part is 0
         //else
-        double numerator = Math.ceil(conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(index) * decimalPart);
+        double numerator = Math.ceil(conversionNodeData.getFractionIntegers().get(index) * decimalPart);
         String mixedFraction = "";
 
         if (roundedQuantity != 0.0) mixedFraction = ((int)roundedQuantity) + " ";
         if (numerator != 0.0) {
-            long denominator = conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(index);
+            long denominator = conversionNodeData.getFractionIntegers().get(index);
             int gcd = BigInteger.valueOf((long)numerator).gcd(BigInteger.valueOf(denominator)).intValue(); //taken from : https://stackoverflow.com/a/4009230
             if (gcd != 1) {
                 numerator /= gcd;
@@ -78,5 +78,47 @@ public class RecipeUtility {
         }
         convertedRecipe.println("");
         convertedRecipe.println(output.getInstructions());
+    }
+
+    public static void applyMeasurementSystemRule(MeasurementSystemParams systemParams, Ingredient finalIngredient) {
+        double quantity = finalIngredient.getQuantity();
+        if (systemParams.getMinWeight() == 0.0) {
+            // either fraction or integer will exist
+            if (systemParams.getFractionIntegers().get(0) != 0) { //f1
+                //represent in fractions
+                // get nearest 1/[0]th fraction of quantity
+                String mixedFraction = getMixedFraction(systemParams, quantity, 0);
+                finalIngredient.setQuantityRepresentation(mixedFraction);
+            } else {
+                //represent in the nearest integers
+                String integerRepresentation = getIntegerRepresentation(systemParams, finalIngredient, quantity, 1);
+                finalIngredient.setQuantityRepresentation(integerRepresentation);
+            }
+        } else {
+            //min wt exists
+            if (finalIngredient.getQuantity() <= systemParams.getMinWeight()) {
+                //use f1 i1
+                if (systemParams.getFractionIntegers().get(0) != 0) {
+                    //use f1 - 0
+                    String mixedFraction = getMixedFraction(systemParams, quantity, 0);
+                    finalIngredient.setQuantityRepresentation(mixedFraction);
+                } else {
+                    //use i1 - 1
+                    String integerRepresentation = getIntegerRepresentation(systemParams, finalIngredient, quantity, 1);
+                    finalIngredient.setQuantityRepresentation(integerRepresentation);
+                }
+            } else {
+                //use f2 i2
+                if (systemParams.getFractionIntegers().get(2) != 0) {
+                    //use f2
+                    String mixedFraction = getMixedFraction(systemParams, quantity, 2);
+                    finalIngredient.setQuantityRepresentation(mixedFraction);
+                } else {
+                    //use i2
+                    String integerRepresentation = getIntegerRepresentation(systemParams, finalIngredient, quantity, 3);
+                    finalIngredient.setQuantityRepresentation(integerRepresentation);
+                }
+            }
+        }
     }
 }

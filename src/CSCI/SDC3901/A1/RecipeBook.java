@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static CSCI.SDC3901.A1.Helpers.RecipeUtility.getIntegerRepresentation;
-import static CSCI.SDC3901.A1.Helpers.RecipeUtility.getMixedFraction;
+import static CSCI.SDC3901.A1.Helpers.RecipeUtility.*;
 
 public class RecipeBook implements RecipeInterface {
 
@@ -56,7 +55,7 @@ public class RecipeBook implements RecipeInterface {
 
 
         recipe("Metric", brR);
-        convert("Egg Curry", "imperial", 2, pw);
+        convert("Egg Curry", "metric", 2, pw);
 
 
         //todo: close connections
@@ -300,6 +299,7 @@ public class RecipeBook implements RecipeInterface {
         String normalisedRecipeName = RecipeUtility.normalizeString(recipeName);
         String normalisedTargetSystem = RecipeUtility.normalizeString(targetSystem);
 
+        boolean isConversionAboveVarianceLimit = false;
         String sourceSystem;
         if (recipes.get(normalisedRecipeName) != null) {
             sourceSystem = recipes.get(normalisedRecipeName).getGivenSystemName();
@@ -309,13 +309,21 @@ public class RecipeBook implements RecipeInterface {
         }
 
         if (sourceSystem.equals(normalisedTargetSystem)) {
-            RecipeUtility.writeConvertedRecipeToPrintWriter(recipes.get(normalisedRecipeName), convertedRecipe);
+            RecipeBookContent scaledRecipe = new RecipeBookContent(recipes.get(normalisedRecipeName));
+            if (scaleFactor != 1.0) {
+                MeasurementSystemParams msp = adjacencyList.get(recipes.get(normalisedRecipeName).getGivenSystemName()).get(0).getConversionData().getSourceMeasurementParams();
+                for(Ingredient ingredient: scaledRecipe.getRecipeCopy().getIngredients()) {
+                    double quantity = ingredient.getQuantity();
+                    ingredient.setQuantity(quantity * scaleFactor);
+                    applyMeasurementSystemRule(msp, ingredient);
+                }
+            }
+            RecipeUtility.writeConvertedRecipeToPrintWriter(scaledRecipe.getRecipeCopy(), convertedRecipe);
             return 0;
         }
 
         ArrayList<GraphNode> path = new ArrayList<>();
         ArrayList<Ingredient> ingredientsOutput = new ArrayList<>();
-        boolean isConversionAboveVarianceLimit = false;
 
         UnitConversionData conversionNodeData = null;
         //check if path exists (with no hop or 1-hop)
@@ -401,14 +409,14 @@ public class RecipeBook implements RecipeInterface {
                 if (!doesConversionExistsForUnit) {
                     return 2;
                 }
-                Ingredient finalUnit = null;
+                Ingredient finalIngredient = null;
                 if (roundedSumOfQuantities == 0.0) {
                     //all zeroes, so choose largest fraction
                     double maxValue = Double.MIN_VALUE;
 
                     for(Ingredient ingredient: potentialTargetUnits) {
                         if (ingredient.getQuantity() > maxValue) {
-                            finalUnit = ingredient;
+                            finalIngredient = ingredient;
                             maxValue = ingredient.getQuantity();
                             if (!ingredient.isVarianceAllowed) isConversionAboveVarianceLimit = true;
                         }
@@ -419,7 +427,7 @@ public class RecipeBook implements RecipeInterface {
 
                     for(Ingredient ingredient: potentialTargetUnits) {
                         if (Math.floor(ingredient.getQuantity()) != 0.0 && ingredient.getQuantity() < minValue) {
-                            finalUnit = ingredient;
+                            finalIngredient = ingredient;
                             minValue = ingredient.getQuantity();
                             if (!ingredient.isVarianceAllowed) isConversionAboveVarianceLimit = true;
                         }
@@ -427,53 +435,13 @@ public class RecipeBook implements RecipeInterface {
                 }
 
                 //apply Measurement system param rules
-                if (finalUnit != null) {
-                    double quantity = finalUnit.getQuantity();
-                    if (conversionNodeData.getTargetMeasurementParams().getMinWeight() == 0.0) {
-                        // either fraction or integer will exist
-                        if (conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(0) != 0) { //f1
-                            //represent in fractions
-                            // get nearest 1/[0]th fraction of quantity
-                            String mixedFraction = getMixedFraction(conversionNodeData, quantity, 0);
-                            finalUnit.setQuantityRepresentation(mixedFraction);
-                        } else {
-                            //represent in the nearest integers
-                            String integerRepresentation = getIntegerRepresentation(conversionNodeData, finalUnit, quantity, 1);
-                            finalUnit.setQuantityRepresentation(integerRepresentation);
-                        }
-                    } else {
-                        //min wt exists
-                        if (finalUnit.getQuantity() <= conversionNodeData.getTargetMeasurementParams().getMinWeight()) {
-                            //use f1 i1
-                            if (conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(0) != 0) {
-                                //use f1 - 0
-                                String mixedFraction = getMixedFraction(conversionNodeData, quantity, 0);
-                                finalUnit.setQuantityRepresentation(mixedFraction);
-                            } else {
-                                //use i1 - 1
-                                String integerRepresentation = getIntegerRepresentation(conversionNodeData, finalUnit, quantity, 1);
-                                finalUnit.setQuantityRepresentation(integerRepresentation);
-                            }
-                        } else {
-                            //use f2 i2
-                            if (conversionNodeData.getTargetMeasurementParams().getFractionIntegers().get(2) != 0) {
-                                //use f2
-                                String mixedFraction = getMixedFraction(conversionNodeData, quantity, 2);
-                                finalUnit.setQuantityRepresentation(mixedFraction);
-                            } else {
-                                //use i2
-                                String integerRepresentation = getIntegerRepresentation(conversionNodeData, finalUnit, quantity, 3);
-                                finalUnit.setQuantityRepresentation(integerRepresentation);
-                            }
-                        }
-                    }
+                if (finalIngredient != null) {
+                    applyMeasurementSystemRule(conversionNodeData.getTargetMeasurementParams(), finalIngredient);
                 } else {
                     //not possible or no target unit found
                     return 2;
                 }
-
-
-                ingredientsOutput.add(finalUnit);
+                ingredientsOutput.add(finalIngredient);
             }
         }
 
