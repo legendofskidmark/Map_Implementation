@@ -1,4 +1,4 @@
-Metric 10 2 0 0 25
+Metric 5 2 0 0 25
 Imperial 0 8 0
 250 ml 1 cup
 5 ml 1 tsp
