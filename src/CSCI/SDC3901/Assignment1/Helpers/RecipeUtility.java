@@ -72,12 +72,20 @@ public class RecipeUtility {
 
     public static void writeConvertedRecipeToPrintWriter(RecipeBookContent output, PrintWriter convertedRecipe) {
         convertedRecipe.println(output.getTitle());
+        System.out.println(output.getTitle());
+
         convertedRecipe.println("");
+        System.out.println("");
+
         for(Ingredient ingredient: output.getIngredients()) {
             convertedRecipe.println(ingredient);
+            System.out.println(ingredient);
         }
         convertedRecipe.println("");
+        System.out.println("");
+
         convertedRecipe.println(output.getInstructions());
+        System.out.println(output.getInstructions());
     }
 
     public static void applyMeasurementSystemRule(MeasurementSystemParams systemParams, Ingredient finalIngredient) {
