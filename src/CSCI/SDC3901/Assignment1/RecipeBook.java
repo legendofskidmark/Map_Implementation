@@ -1,15 +1,15 @@
-package CSCI.SDC3901.A1;
+package CSCI.SDC3901.Assignment1;
 
-import CSCI.SDC3901.A1.Helpers.RecipeUtility;
-import CSCI.SDC3901.A1.Interfaces.RecipeInterface;
-import CSCI.SDC3901.A1.Models.*;
+import CSCI.SDC3901.Assignment1.Helpers.RecipeUtility;
+import CSCI.SDC3901.Assignment1.Interfaces.RecipeInterface;
+import CSCI.SDC3901.Assignment1.Models.*;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static CSCI.SDC3901.A1.Helpers.RecipeUtility.*;
+import static CSCI.SDC3901.Assignment1.Helpers.RecipeUtility.*;
 
 public class RecipeBook implements RecipeInterface {
 

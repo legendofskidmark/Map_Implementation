@@ -1,7 +1,4 @@
-package CSCI.SDC3901.A1.Models;
-
-import CSCI.SDC3901.A1.Models.ConversionLine;
-import CSCI.SDC3901.A1.Models.MeasurementSystemParams;
+package CSCI.SDC3901.Assignment1.Models;
 
 import java.util.ArrayList;
 

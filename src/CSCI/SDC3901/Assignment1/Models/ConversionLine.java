@@ -1,4 +1,4 @@
-package CSCI.SDC3901.A1.Models;
+package CSCI.SDC3901.Assignment1.Models;
 
 public class ConversionLine {
 

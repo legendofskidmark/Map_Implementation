@@ -1,7 +1,5 @@
-package CSCI.SDC3901.A1;
+package CSCI.SDC3901.Assignment1;
 
-
-import java.util.HashMap;
 
 public class A1 {
     public static void main(String[] args) {
