@@ -56,7 +56,7 @@ public class RecipeBook implements RecipeInterface {
 
 
         recipe("Metric", brR);
-        convert("Egg Curry", "indian", 2, pw);
+        convert("Egg Curry", "imperial", 2, pw);
 
 
         //todo: close connections
@@ -243,6 +243,7 @@ public class RecipeBook implements RecipeInterface {
 
                         Ingredient formattedIngredient;
                         double quantity;
+                        String quantityRepresentation = ingredient[0];
                         String units;
                         String name = "";
                         int index = 2;
@@ -269,6 +270,7 @@ public class RecipeBook implements RecipeInterface {
                         for(int i = index ; i < ingredient.length ; i++) name += ingredient[i] + " ";
 
                         formattedIngredient = new Ingredient(quantity, units, name);
+                        formattedIngredient.setQuantityRepresentation(quantityRepresentation);
                         recipeIngredients.add(formattedIngredient);
                     } while ((line = recipeContent.readLine()) != null);
                 } else if (!instructionsRead) {
@@ -476,7 +478,6 @@ public class RecipeBook implements RecipeInterface {
         }
 
         RecipeBookContent targetRecipe = recipes.get(normalisedRecipeName);
-        convertedRecipe.println(targetRecipe.getInstructions());
         RecipeBookContent output = new RecipeBookContent(targetSystem, recipeName + " (" + targetSystem + ")", ingredientsOutput, targetRecipe.getInstructions());
 
         RecipeUtility.writeConvertedRecipeToPrintWriter(output, convertedRecipe);
