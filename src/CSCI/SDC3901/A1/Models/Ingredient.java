@@ -1,12 +1,12 @@
-package CSCI.SDC3901.A1;
+package CSCI.SDC3901.A1.Models;
 
 public class Ingredient {
     private double quantity;
     private String units;
     private String name;
     private String quantityRepresentation = "";
-    boolean isVarianceAllowed;
-    Ingredient(double quantity, String units, String name) {
+    private boolean isVarianceAllowed;
+    public Ingredient(double quantity, String units, String name) {
         this.quantity = quantity;
         this.units = units;
         this.name = name;
@@ -34,6 +34,10 @@ public class Ingredient {
 
     public void setVarianceAllowed(boolean varianceAllowed) {
         isVarianceAllowed = varianceAllowed;
+    }
+
+    public boolean getVarianceAllowed() {
+        return isVarianceAllowed;
     }
 
     @Override

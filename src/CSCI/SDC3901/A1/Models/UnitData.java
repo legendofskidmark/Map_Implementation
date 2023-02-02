@@ -1,11 +1,11 @@
-package CSCI.SDC3901.A1;
+package CSCI.SDC3901.A1.Models;
 
 public class UnitData {
 
     private double quantity;
     private String unitName;
 
-    UnitData(double quantity, String unitName) {
+    public UnitData(double quantity, String unitName) {
         this.unitName = unitName;
         this.quantity = quantity;
     }

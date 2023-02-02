@@ -1,4 +1,4 @@
-package CSCI.SDC3901.A1;
+package CSCI.SDC3901.A1.Interfaces;
 
 import java.io.BufferedReader;
 import java.io.PrintWriter;

@@ -1,4 +1,4 @@
-package CSCI.SDC3901.A1;
+package CSCI.SDC3901.A1.Models;
 
 import java.util.ArrayList;
 
@@ -8,9 +8,9 @@ public class MeasurementSystemParams {
     private double minWeight;
     private ArrayList<Integer> fractionIntegers;
 
-    MeasurementSystemParams() {}
+    public MeasurementSystemParams() {}
 
-    MeasurementSystemParams(String systemName, double minWeight, ArrayList<Integer> fractionIntegers) {
+    public MeasurementSystemParams(String systemName, double minWeight, ArrayList<Integer> fractionIntegers) {
         this.systemName = systemName;
         this.minWeight = minWeight;
         this.fractionIntegers = fractionIntegers;

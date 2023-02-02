@@ -1,6 +1,9 @@
 package CSCI.SDC3901.A1;
 
 import CSCI.SDC3901.A1.Helpers.RecipeUtility;
+import CSCI.SDC3901.A1.Interfaces.RecipeInterface;
+import CSCI.SDC3901.A1.Models.*;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -418,7 +421,7 @@ public class RecipeBook implements RecipeInterface {
                         if (ingredient.getQuantity() > maxValue) {
                             finalIngredient = ingredient;
                             maxValue = ingredient.getQuantity();
-                            if (!ingredient.isVarianceAllowed) isConversionAboveVarianceLimit = true;
+                            if (!ingredient.getVarianceAllowed()) isConversionAboveVarianceLimit = true;
                         }
                     }
                 } else {
@@ -429,7 +432,7 @@ public class RecipeBook implements RecipeInterface {
                         if (Math.floor(ingredient.getQuantity()) != 0.0 && ingredient.getQuantity() < minValue) {
                             finalIngredient = ingredient;
                             minValue = ingredient.getQuantity();
-                            if (!ingredient.isVarianceAllowed) isConversionAboveVarianceLimit = true;
+                            if (!ingredient.getVarianceAllowed()) isConversionAboveVarianceLimit = true;
                         }
                     }
                 }

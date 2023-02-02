@@ -1,4 +1,4 @@
-package CSCI.SDC3901.A1;
+package CSCI.SDC3901.A1.Models;
 
 public class GraphNode {
 
@@ -9,7 +9,7 @@ public class GraphNode {
 
     GraphNode() {}
 
-    GraphNode(String systemName, UnitConversionData conversionData) {
+    public GraphNode(String systemName, UnitConversionData conversionData) {
         this.systemName = systemName;
         this.conversionData = conversionData;
     }

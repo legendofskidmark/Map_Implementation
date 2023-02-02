@@ -1,8 +1,8 @@
 package CSCI.SDC3901.A1.Helpers;
 
-import CSCI.SDC3901.A1.Ingredient;
-import CSCI.SDC3901.A1.MeasurementSystemParams;
-import CSCI.SDC3901.A1.RecipeBookContent;
+import CSCI.SDC3901.A1.Models.Ingredient;
+import CSCI.SDC3901.A1.Models.MeasurementSystemParams;
+import CSCI.SDC3901.A1.Models.RecipeBookContent;
 
 import java.io.PrintWriter;
 import java.math.BigInteger;

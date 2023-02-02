@@ -1,4 +1,7 @@
-package CSCI.SDC3901.A1;
+package CSCI.SDC3901.A1.Models;
+
+import CSCI.SDC3901.A1.Models.ConversionLine;
+import CSCI.SDC3901.A1.Models.MeasurementSystemParams;
 
 import java.util.ArrayList;
 
@@ -8,7 +11,7 @@ public class UnitConversionData {
     private MeasurementSystemParams targetMeasurementParams; //unit conversion 2nd line
     private ArrayList<ConversionLine> sourceToTargetUnits; // size q size q
 
-    UnitConversionData(MeasurementSystemParams sourceMeasurementParams, MeasurementSystemParams targetMeasurementParams, ArrayList<ConversionLine> sourceToTargetUnits) {
+    public UnitConversionData(MeasurementSystemParams sourceMeasurementParams, MeasurementSystemParams targetMeasurementParams, ArrayList<ConversionLine> sourceToTargetUnits) {
         this.sourceMeasurementParams = sourceMeasurementParams;
         this.targetMeasurementParams = targetMeasurementParams;
         this.sourceToTargetUnits = sourceToTargetUnits;

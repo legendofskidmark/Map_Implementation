@@ -1,4 +1,4 @@
-package CSCI.SDC3901.A1;
+package CSCI.SDC3901.A1.Models;
 
 
 import java.util.ArrayList;
@@ -11,11 +11,11 @@ public class RecipeBookContent {
     private String instructions;
     private RecipeBookContent recipeCopy;
 
-    RecipeBookContent(RecipeBookContent recipe) { //src : https://stackoverflow.com/a/869078
+    public RecipeBookContent(RecipeBookContent recipe) { //src : https://stackoverflow.com/a/869078
         this.recipeCopy = recipe;
     }
 
-    RecipeBookContent(String givenSystemName, String title, ArrayList<Ingredient> ingredients, String instructions) {
+    public RecipeBookContent(String givenSystemName, String title, ArrayList<Ingredient> ingredients, String instructions) {
         this.givenSystemName = givenSystemName;
         this.title = title;
         this.ingredients = ingredients;
