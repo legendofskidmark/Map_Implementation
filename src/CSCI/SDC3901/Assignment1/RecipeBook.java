@@ -21,48 +21,6 @@ public class RecipeBook implements RecipeInterface {
     public RecipeBook() {
         adjacencyList = new HashMap<>();
         recipes = new HashMap<>();
-
-        FileReader frUC;
-        FileReader frRecipe;
-        try {
-            frUC = new FileReader("unitConversion.txt");
-            frRecipe = new FileReader("recipe.txt");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        BufferedReader brUC = new BufferedReader(frUC);
-        BufferedReader brR = new BufferedReader(frRecipe);
-        unitConversion(brUC); //first file
-
-        try {
-            frUC = new FileReader("unitConversion2.txt");
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        brUC = new BufferedReader(frUC);
-        unitConversion(brUC); //second file
-
-        PrintWriter pw;
-        try {
-            File file = new File("opboon.txt");
-
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            pw = new PrintWriter(file);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-
-        recipe("Metric", brR);
-        convert("Egg Curry", "metric", 2, pw);
-
-
-        //todo: close connections
-        pw.close();
     }
 
     @Override
@@ -321,6 +279,8 @@ public class RecipeBook implements RecipeInterface {
                     applyMeasurementSystemRule(msp, ingredient);
                 }
             }
+            String title = scaledRecipe.getRecipeCopy().getTitle();
+            scaledRecipe.getRecipeCopy().setTitle(title + " (" + targetSystem + ")");
             RecipeUtility.writeConvertedRecipeToPrintWriter(scaledRecipe.getRecipeCopy(), convertedRecipe);
             return 0;
         }

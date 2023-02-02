@@ -1,4 +1,4 @@
-egg curry
+egg curry (metric)
 
 9 	ml	flour and mix 
 400	ml	salt 

@@ -30,6 +30,10 @@ public class RecipeBookContent {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public ArrayList<Ingredient> getIngredients() {
         return ingredients;
     }
