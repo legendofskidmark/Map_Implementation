@@ -305,6 +305,11 @@ public class RecipeBook implements RecipeInterface {
             return 2;
         }
 
+        if (sourceSystem.equals(normalisedTargetSystem)) {
+            RecipeUtility.writeConvertedRecipeToPrintWriter(recipes.get(normalisedRecipeName), convertedRecipe);
+            return 0;
+        }
+
         ArrayList<GraphNode> path = new ArrayList<>();
         ArrayList<Ingredient> ingredientsOutput = new ArrayList<>();
         boolean isConversionAboveVarianceLimit = false;
@@ -469,15 +474,11 @@ public class RecipeBook implements RecipeInterface {
             }
         }
 
-
-        convertedRecipe.println(recipeName + " (" + targetSystem + ")");
-        convertedRecipe.println("");
-        for(Ingredient targetUnits : ingredientsOutput) {
-            convertedRecipe.println(targetUnits.toString());
-        }
-        convertedRecipe.println("");
         RecipeBookContent targetRecipe = recipes.get(normalisedRecipeName);
         convertedRecipe.println(targetRecipe.getInstructions());
+        RecipeBookContent output = new RecipeBookContent(targetSystem, recipeName + " (" + targetSystem + ")", ingredientsOutput, targetRecipe.getInstructions());
+
+        RecipeUtility.writeConvertedRecipeToPrintWriter(output, convertedRecipe);
 
         if (isConversionAboveVarianceLimit) return 1;
         return 0;

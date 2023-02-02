@@ -1,8 +1,10 @@
 package CSCI.SDC3901.A1.Helpers;
 
 import CSCI.SDC3901.A1.Ingredient;
+import CSCI.SDC3901.A1.RecipeBookContent;
 import CSCI.SDC3901.A1.UnitConversionData;
 
+import java.io.PrintWriter;
 import java.math.BigInteger;
 
 public class RecipeUtility {
@@ -66,5 +68,15 @@ public class RecipeUtility {
             mixedFraction += (int)numerator + "/" + denominator;
         }
         return mixedFraction;
+    }
+
+    public static void writeConvertedRecipeToPrintWriter(RecipeBookContent output, PrintWriter convertedRecipe) {
+        convertedRecipe.println(output.getTitle());
+        convertedRecipe.println("");
+        for(Ingredient ingredient: output.getIngredients()) {
+            convertedRecipe.println(ingredient);
+        }
+        convertedRecipe.println("");
+        convertedRecipe.println(output.getInstructions());
     }
 }

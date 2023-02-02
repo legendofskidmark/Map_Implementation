@@ -21,6 +21,10 @@ public class RecipeBookContent {
         return givenSystemName;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
     public ArrayList<Ingredient> getIngredients() {
         return ingredients;
     }
