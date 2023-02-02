@@ -216,64 +216,66 @@ public class RecipeBook implements RecipeInterface {
         if (originalSystem == null) return false;
         if (originalSystem.length() == 0) return false;
 
-        //read Recipe title
-        int lineNo = 1;
-        int blankLineCount = 0;
         String line;
         String recipeTitle = "";
         ArrayList<Ingredient> recipeIngredients = new ArrayList<>();
         String instructions = "";
+        boolean titleRead = false;
+        boolean ingredientsRead = false;
+        boolean instructionsRead = false;
 
         try {
             while ((line = recipeContent.readLine()) != null) {
-                if (lineNo == 1) {
+                if (line.length() == 0 || line.equals("\n") || line.equals("\t") || line.equals("\b") || line.equals("\r")) continue;
+                if (!titleRead) {
+                    titleRead = true;
                     recipeTitle = RecipeUtility.normalizeString(line); //todo: must be unique
-                } else if (line.equals("\n") || line.equals("")) {
-                    blankLineCount++;
-                    continue;
-                }
 
-                if (blankLineCount == 1) { //todo: handle multiple blank lines case
-                    String[] ingredient = line.split("\t");
-                    if (ingredient.length < 3) { //todo: handle "1 egg" case
-                        return false;
-                    }
+                } else if (!ingredientsRead) {
+                    do {
+                        if (line.length() == 0 || line.equals("\n") || line.equals("\t") || line.equals("\b") || line.equals("\r")) {
+                            ingredientsRead = true;
+                            break;
+                        }
+                        String[] ingredient = line.split("\t");
+                        if (ingredient.length < 3) { //todo: handle "1 egg" case
+                            return false;
+                        }
 
-                    Ingredient formattedIngredient;
-                    double quantity;
-                    String units = "";
-                    String name = "";
-                    int index = 2;
-                    if (ingredient[0].contains("/")) {
-                        //case 2: <i> <fr> \t <u> \t <name>
-                        String[] fraction = ingredient[0].split(" ");
-                        Integer a = Integer.valueOf(fraction[0]);
+                        Ingredient formattedIngredient;
+                        double quantity;
+                        String units = "";
+                        String name = "";
+                        int index = 2;
+                        if (ingredient[0].contains("/")) {
+                            //case 2: <i> <fr> \t <u> \t <name>
+                            String[] fraction = ingredient[0].split(" ");
+                            Integer a = Integer.valueOf(fraction[0]);
 
-                        if (a < 0) return false;
+                            if (a < 0) return false;
 
-                        String[] numeratorDenominator = fraction[1].split("/");
-                        Integer b = Integer.valueOf(numeratorDenominator[0]);
-                        Integer c = Integer.valueOf(numeratorDenominator[1]); //todo: edge case
+                            String[] numeratorDenominator = fraction[1].split("/");
+                            Integer b = Integer.valueOf(numeratorDenominator[0]);
+                            Integer c = Integer.valueOf(numeratorDenominator[1]);
 
-                        if (b == 0 || c == 0) return false;
+                            if (b == 0 || c == 0) return false;
 
-                        quantity = (1.0 * (a * c + b)) / c;
-                    } else {
-                        //case 1: <i> <u> <name>
-                        quantity = Double.valueOf(ingredient[0]);
-                    }
-                    if (quantity <= 0) return false;
-                    units = ingredient[1];
-                    for(int i = index ; i < ingredient.length ; i++) name += ingredient[i] + " ";
+                            quantity = (1.0 * (a * c + b)) / c;
+                        } else {
+                            //case 1: <i> <u> <name>
+                            quantity = Double.valueOf(ingredient[0]);
+                        }
+                        if (quantity <= 0) return false;
+                        units = ingredient[1];
+                        for(int i = index ; i < ingredient.length ; i++) name += ingredient[i] + " ";
 
-                    formattedIngredient = new Ingredient(quantity, units, name);
-                    recipeIngredients.add(formattedIngredient);
-                } else if (blankLineCount > 1) {
+                        formattedIngredient = new Ingredient(quantity, units, name);
+                        recipeIngredients.add(formattedIngredient);
+                    } while ((line = recipeContent.readLine()) != null);
+                } else if (!instructionsRead) {
                     //read instructions
                     instructions += line + "\n";
                 }
-
-                lineNo++;
             }
 
             RecipeBookContent currentRecipe = new RecipeBookContent(RecipeUtility.normalizeString(originalSystem), recipeTitle, recipeIngredients, instructions);
