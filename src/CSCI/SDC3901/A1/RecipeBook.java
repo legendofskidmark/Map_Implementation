@@ -4,6 +4,7 @@ import CSCI.SDC3901.A1.Helpers.RecipeUtility;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static CSCI.SDC3901.A1.Helpers.RecipeUtility.getIntegerRepresentation;
 import static CSCI.SDC3901.A1.Helpers.RecipeUtility.getMixedFraction;
@@ -482,6 +483,16 @@ public class RecipeBook implements RecipeInterface {
 
         if (isConversionAboveVarianceLimit) return 1;
         return 0;
+    }
+
+    @Override
+    public List<String> availableUnits() {
+        return new ArrayList<>(adjacencyList.keySet());
+    }
+
+    @Override
+    public List<String> availableRecipes() {
+        return new ArrayList<>(this.recipes.keySet());
     }
 
 }
