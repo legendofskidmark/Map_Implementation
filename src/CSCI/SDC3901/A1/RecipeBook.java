@@ -11,17 +11,17 @@ import static CSCI.SDC3901.A1.Helpers.RecipeUtility.getMixedFraction;
 
 public class RecipeBook implements RecipeInterface {
 
-    private HashMap<String, ArrayList<GraphNode>> adjacencyList;
-    private HashMap<String, RecipeBookContent> recipes;
+    private final HashMap<String, ArrayList<GraphNode>> adjacencyList;
+    private final HashMap<String, RecipeBookContent> recipes;
 
-    private final double varianceThresholdPercentage = 5.0;
+    private final static double varianceThresholdPercentage = 5.0;
 
     public RecipeBook() {
         adjacencyList = new HashMap<>();
         recipes = new HashMap<>();
 
-        FileReader frUC = null;
-        FileReader frRecipe = null;
+        FileReader frUC;
+        FileReader frRecipe;
         try {
             frUC = new FileReader("unitConversion.txt");
             frRecipe = new FileReader("recipe.txt");
@@ -40,7 +40,7 @@ public class RecipeBook implements RecipeInterface {
         brUC = new BufferedReader(frUC);
         unitConversion(brUC); //second file
 
-        PrintWriter pw = null;
+        PrintWriter pw;
         try {
             File file = new File("opboon.txt");
 
@@ -125,8 +125,8 @@ public class RecipeBook implements RecipeInterface {
 
                     sizeUnits[1] = RecipeUtility.normalizeString(sizeUnits[1]);
                     sizeUnits[3] = RecipeUtility.normalizeString(sizeUnits[3]);
-                    UnitData sourceUnitData = new UnitData(Double.valueOf(sizeUnits[0]), sizeUnits[1]);
-                    UnitData targetUnitData = new UnitData(Double.valueOf(sizeUnits[2]), sizeUnits[3]);
+                    UnitData sourceUnitData = new UnitData(Double.parseDouble(sizeUnits[0]), sizeUnits[1]);
+                    UnitData targetUnitData = new UnitData(Double.parseDouble(sizeUnits[2]), sizeUnits[3]);
 
 
                     // a --> b
@@ -243,7 +243,7 @@ public class RecipeBook implements RecipeInterface {
 
                         Ingredient formattedIngredient;
                         double quantity;
-                        String units = "";
+                        String units;
                         String name = "";
                         int index = 2;
                         if (ingredient[0].contains("/")) {
@@ -262,7 +262,7 @@ public class RecipeBook implements RecipeInterface {
                             quantity = (1.0 * (a * c + b)) / c;
                         } else {
                             //case 1: <i> <u> <name>
-                            quantity = Double.valueOf(ingredient[0]);
+                            quantity = Double.parseDouble(ingredient[0]);
                         }
                         if (quantity <= 0) return false;
                         units = ingredient[1];
@@ -341,8 +341,8 @@ public class RecipeBook implements RecipeInterface {
             GraphNode a = path.get(0);
             GraphNode b = path.get(1);
             ArrayList<ConversionLine> sourceToTargetUnits = new ArrayList<>();
-            UnitData src = null;
-            UnitData target = null;
+            UnitData src;
+            UnitData target;
             for(ConversionLine col1: a.getConversionData().getSourceToTargetUnits()) {
                 for(ConversionLine col2: b.getConversionData().getSourceToTargetUnits()) {
                     if (col1.getTargetUnitData().getUnitName().equals(col2.getSourceUnitData().getUnitName())) {
@@ -389,7 +389,7 @@ public class RecipeBook implements RecipeInterface {
                         double targetUnitQuantity = (currentIngredient.getQuantity() * conversion.getTargetUnitData().getQuantity())/conversion.getSourceUnitData().getQuantity();
                         Ingredient potentialUnit = new Ingredient(targetUnitQuantity, conversion.getTargetUnitData().getUnitName(), currentIngredient.getName());
                         roundedSumOfQuantities += Math.floor(targetUnitQuantity);
-                        boolean isVarianceAllowed = RecipeUtility.isVarianceGood(this.varianceThresholdPercentage, conversion.getSourceUnitData().getQuantity(), conversion.getTargetUnitData().getQuantity(), currentIngredient.getQuantity(), targetUnitQuantity);
+                        boolean isVarianceAllowed = RecipeUtility.isVarianceGood(varianceThresholdPercentage, conversion.getSourceUnitData().getQuantity(), conversion.getTargetUnitData().getQuantity(), currentIngredient.getQuantity(), targetUnitQuantity);
                         potentialUnit.setVarianceAllowed(isVarianceAllowed);
                         potentialTargetUnits.add(potentialUnit);
                         doesConversionExistsForUnit = true;
