@@ -1,8 +1,11 @@
 package CSCI.SDC3901.Assignment1.Models;
 
+/**
+ * The node of the graph which contains the target system data
+ *
+ * @author boon
+ */
 public class GraphNode {
-
-    //graph node
 
     private String systemName;
     private UnitConversionData conversionData;

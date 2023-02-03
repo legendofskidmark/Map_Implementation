@@ -1,5 +1,10 @@
 package CSCI.SDC3901.Assignment1.Models;
 
+/**
+ * The model class to represent an ingredient's quantity and its units
+ *
+ * @author boon
+ */
 public class UnitData {
 
     private double quantity;

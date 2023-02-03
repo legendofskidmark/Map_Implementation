@@ -1,5 +1,10 @@
 package CSCI.SDC3901.Assignment1.Models;
 
+/**
+ * The model class for the conversion lines after the Measurement system parameters are processed
+ *
+ * @author boon
+ */
 public class ConversionLine {
 
     private UnitData sourceUnitData;

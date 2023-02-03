@@ -7,8 +7,19 @@ import CSCI.SDC3901.Assignment1.Models.RecipeBookContent;
 import java.io.PrintWriter;
 import java.math.BigInteger;
 
+/**
+ *  A Utility class for the Recipe Conversion system
+ *
+ * @author boon
+ */
 public class RecipeUtility {
 
+    /**
+     * converts string to lowercase
+     *
+     * @param str any term in the recipe content
+     * @return a string that is turned into lowercase
+     */
     public static String normalizeString(String str) {
         if (str == null) {
             throw new RuntimeException("Invalid Unit in the conversion file");
@@ -16,6 +27,16 @@ public class RecipeUtility {
         return str.toLowerCase();
     }
 
+    /**
+     *  Computes variance between two conversions
+     *
+     * @param varianceThresholdPercentage the maximum amount of variance allowed
+     * @param existingSize1 conversion quantity of the first measurement system
+     * @param existingSize2 conversion quantity of the second measurement system
+     * @param size1 potential conversion quantity of the first measurement system
+     * @param size2 potential conversion quantity of the first measurement system
+     * @return A boolean value indicating if the variance is under the limit
+     */
     public static boolean isVarianceGood(double varianceThresholdPercentage, Double existingSize1, Double existingSize2, Double size1, Double size2) {
         double minRange = 0.0;
         double maxRange = 0.0;
@@ -35,6 +56,15 @@ public class RecipeUtility {
         }
     }
 
+    /**
+     *  converts decimal number to Integer representation
+     *
+     * @param conversionNodeData parameters of the measurement system we have to use
+     * @param finalUnit selected ingredient unit based on the criteria
+     * @param quantity decimal representation of the quantity
+     * @param index index of the fraction integer array given in the measurement system parameters
+     * @return An Integer which is equivalent to the double value after applying the rules in the measurement system
+     */
     public static String getIntegerRepresentation(MeasurementSystemParams conversionNodeData, Ingredient finalUnit, double quantity, int index) {
         String integerRepresentation;
         if (quantity <= conversionNodeData.getFractionIntegers().get(index)) { //i1
@@ -49,6 +79,14 @@ public class RecipeUtility {
         return integerRepresentation;
     }
 
+    /**
+     * converts decimal number to mixed fraction representation
+     *
+     * @param conversionNodeData parameters of the measurement system we have to use
+     * @param quantity decimal representation of the quantity
+     * @param index index of the fraction integer array given in the measurement system parameters
+     * @return A mixed fraction which is equivalent to the double value after applying the rules in the measurement system
+     */
     public static String getMixedFraction(MeasurementSystemParams conversionNodeData, double quantity, int index) {
         double roundedQuantity = Math.floor(quantity);
         double decimalPart = quantity - roundedQuantity;
@@ -70,6 +108,12 @@ public class RecipeUtility {
         return mixedFraction;
     }
 
+    /**
+     * Writes the converted recipe to a file using PrintWriter
+     *
+     * @param output RecipeContentBook object which is having the converted recipe
+     * @param convertedRecipe PrintWriter object to write the recipe content to a file
+     */
     public static void writeConvertedRecipeToPrintWriter(RecipeBookContent output, PrintWriter convertedRecipe) {
         convertedRecipe.println(output.getTitle());
         System.out.println(output.getTitle());
@@ -88,6 +132,12 @@ public class RecipeUtility {
         System.out.println(output.getInstructions());
     }
 
+    /**
+     *  Applies rules to the newly derived unit chosen amongst multiple choices
+     *
+     * @param systemParams parameters of the measurement system we have to use
+     * @param finalIngredient selected ingredient before applying the measuring system rules
+     */
     public static void applyMeasurementSystemRule(MeasurementSystemParams systemParams, Ingredient finalIngredient) {
         double quantity = finalIngredient.getQuantity();
         if (systemParams.getMinWeight() == 0.0) {

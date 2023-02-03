@@ -4,6 +4,11 @@ import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.util.List;
 
+/**
+ * The Interface which the RecipeBook class has to implement
+ *
+ * @author boon
+ */
 public interface RecipeInterface {
     public Boolean unitConversion(BufferedReader unitMatches);
     public Boolean recipe(String originalSystem, BufferedReader recipeContent);

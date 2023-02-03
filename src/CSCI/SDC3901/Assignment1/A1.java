@@ -1,9 +1,13 @@
 package CSCI.SDC3901.Assignment1;
 
-
 import java.io.*;
 import java.util.Scanner;
 
+/**
+ * A class to demonstrate the RecipeBook class functionality
+ *
+ * @author boon
+ */
 public class A1 {
     public static void main(String[] args) {
 

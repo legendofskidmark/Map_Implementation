@@ -2,8 +2,12 @@ package CSCI.SDC3901.Assignment1.Models;
 
 import java.util.ArrayList;
 
+/**
+ * The model class to represent the measure system parameters
+ *
+ * @author boon
+ */
 public class MeasurementSystemParams {
-//unit conversion lo first 2 lines
     private String systemName;
     private double minWeight;
     private ArrayList<Integer> fractionIntegers;

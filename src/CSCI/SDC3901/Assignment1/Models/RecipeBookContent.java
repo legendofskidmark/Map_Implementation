@@ -1,8 +1,12 @@
 package CSCI.SDC3901.Assignment1.Models;
 
-
 import java.util.ArrayList;
 
+/**
+ * The model class to encompass all the data about a recipe
+ *
+ * @author boon
+ */
 public class RecipeBookContent {
 
     private String givenSystemName;
@@ -11,6 +15,9 @@ public class RecipeBookContent {
     private String instructions;
     private RecipeBookContent recipeCopy;
 
+    /** Parameterized constructor to copy a Recipe object
+     * @param recipe The Recipe object which we want to create a copy of
+     */
     public RecipeBookContent(RecipeBookContent recipe) { //src : https://stackoverflow.com/a/869078
         this.recipeCopy = recipe;
     }

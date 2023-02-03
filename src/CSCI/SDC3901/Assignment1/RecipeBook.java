@@ -11,18 +11,32 @@ import java.util.List;
 
 import static CSCI.SDC3901.Assignment1.Helpers.RecipeUtility.*;
 
+/**
+ * The RecipeBook class is to demonstrate the unit conversion of a recipe to a target measurement system by appropriately rounding and/or converting the quantities based on the measurement system rules
+ *
+ * @author boon
+ */
 public class RecipeBook implements RecipeInterface {
+
+    /**
+     * A static final value denoting the allowed variance percentage
+     */
+    private final static double varianceThresholdPercentage = 5.0;
 
     private final HashMap<String, ArrayList<GraphNode>> adjacencyList;
     private final HashMap<String, RecipeBookContent> recipes;
 
-    private final static double varianceThresholdPercentage = 5.0;
 
     public RecipeBook() {
         adjacencyList = new HashMap<>();
         recipes = new HashMap<>();
     }
 
+    /**
+     * Reads the unit conversion content from a file
+     * @param unitMatches The Unit Conversion file's content
+     * @return A boolean value denoting if the conversion is successful and under the given tolerance level
+     */
     @Override
     public Boolean unitConversion(BufferedReader unitMatches) {
         int lineNo = 1;
@@ -169,6 +183,13 @@ public class RecipeBook implements RecipeInterface {
         return true;
     }
 
+    /**
+     *  Reads the recipe contents from a file
+     *
+     * @param originalSystem The Measurement system of the given Recipe
+     * @param recipeContent The file with Recipe contents
+     * @return A boolean value to denote if the processing of the Recipe content file is successful
+     */
     @Override
     public Boolean recipe(String originalSystem, BufferedReader recipeContent) {
 
@@ -247,6 +268,18 @@ public class RecipeBook implements RecipeInterface {
         return true;
     }
 
+
+    /**
+     *
+     * @param recipeName The name of the recipe we have to convert to the target system
+     * @param targetSystem The measurement system to which we have to convert the recipe
+     * @param scaleFactor The value which is used to scale the recipe
+     * @param convertedRecipe The PrintWriter object to save the converted recipe contents to a file
+     * @return an integer
+     *          <p>0 - Conversion is successful without any issue</p>
+     *          <p>1 - Conversion is successful, but few quantities in the converted recipe might be over the given tolerance level</p>
+     *          <p>2 - Conversion failed. No meaningful output provided to the PrintWriter</p>
+     */
     @Override
     public int convert(String recipeName, String targetSystem, double scaleFactor, PrintWriter convertedRecipe) {
 
@@ -417,11 +450,18 @@ public class RecipeBook implements RecipeInterface {
         return 0;
     }
 
+    /**
+     *
+     * @return List of all the available system names used for the recipe conversion
+     */
     @Override
     public List<String> availableUnits() {
         return new ArrayList<>(adjacencyList.keySet());
     }
 
+    /**
+     * @return List of all available recipes that are processed till now
+     */
     @Override
     public List<String> availableRecipes() {
         return new ArrayList<>(this.recipes.keySet());
