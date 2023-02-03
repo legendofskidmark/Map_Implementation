@@ -42,13 +42,21 @@ public class RecipeBook implements RecipeInterface {
         int lineNo = 1;
         String line;
 
+        // This is the _Node a_ in the graph
         MeasurementSystemParams sourceMeasurementParams = new MeasurementSystemParams();
+
+        // This is the _Node b_ in the graph
         MeasurementSystemParams targetMeasurementParams = new MeasurementSystemParams();
+
+        //list to store conversions from _Node a_ to _Node b_
         ArrayList<ConversionLine> sourceToTargetUnits = new ArrayList<>();
+
+        //list to store conversions from _Node b_ to _Node a_
         ArrayList<ConversionLine> targetToSourceUnits = new ArrayList<>();
 
         try {
             while ((line = unitMatches.readLine()) != null) {
+
                 String[] sizeUnits = line.split(" ");
                 if (lineNo <= 2) { //sizeUnits = metric, 5, 2, 0, 0, 25 or imperial, 0, 8, 0
                     String systemName = RecipeUtility.normalizeString(sizeUnits[0]);
@@ -64,24 +72,29 @@ public class RecipeBook implements RecipeInterface {
                         fractionsIntegers.add(ruleValue);
                     }
 
-                    //data validation
+                    //data validation of the unit conversion file
                     if (minWeight.equals(0)) {
+                        // if insufficient number of fractions and integers are provided
                         if (fractionsIntegers.size() != 2) {
                             return false;
                         }
 
+                        // if minimum weight = 0 and both the fraction1 and integer1 are 0 or non-zero
                         if ((fractionsIntegers.get(0) != 0 && fractionsIntegers.get(1) != 0) || (fractionsIntegers.get(0) == 0 && fractionsIntegers.get(1) == 0)) {
                             return false;
                         }
                     } else {
+                        // if insufficient number of fractions and integers are provided when minimum weight > 0
                         if (fractionsIntegers.size() != 4) {
                             return false;
                         }
 
+                        // if both the fraction1 and integer1 are 0 or non-zero
                         if ((fractionsIntegers.get(0) != 0 && fractionsIntegers.get(1) != 0) || (fractionsIntegers.get(0) == 0 && fractionsIntegers.get(1) == 0)) {
                             return false;
                         }
 
+                        // if both the fraction2 and integer2 are 0 or non-zero
                         if ((fractionsIntegers.get(2) != 0 && fractionsIntegers.get(3) != 0) || (fractionsIntegers.get(2) == 0 && fractionsIntegers.get(3) == 0)) {
                             return false;
                         }
@@ -103,7 +116,8 @@ public class RecipeBook implements RecipeInterface {
                     UnitData targetUnitData = new UnitData(Double.parseDouble(sizeUnits[2]), sizeUnits[3]);
 
 
-                    // a --> b
+                    // create path from Node_a to Node_b : BEGIN
+                    // Store the given data as a path in the graph : Node_a --> Node_b
                     ConversionLine conversionData = null;
                     for (ConversionLine conversionEntries: sourceToTargetUnits) {
                         if (conversionEntries.getSourceUnitData().getUnitName().equals(sizeUnits[1]) && conversionEntries.getTargetUnitData().getUnitName().equals(sizeUnits[3])) {
@@ -125,9 +139,10 @@ public class RecipeBook implements RecipeInterface {
                         ConversionLine conversionEntry = new ConversionLine(sourceUnitData, targetUnitData);
                         sourceToTargetUnits.add(conversionEntry);
                     }
+                    // create path from Node_a to Node_b : END
 
 
-                    // b --> a
+                     // Store the given data as a path in the graph : Node_b --> Node_a : BEGIN
                     conversionData = null;
                     for (ConversionLine conversionEntries: targetToSourceUnits) {
                         if (conversionEntries.getSourceUnitData().getUnitName().equals(sizeUnits[3]) && conversionEntries.getTargetUnitData().getUnitName().equals(sizeUnits[1])) {
@@ -139,16 +154,17 @@ public class RecipeBook implements RecipeInterface {
                     if (conversionData != null) { //todo: assumption -> even if we have multiple same unit entries only the first is taken as truth even if the below ones are less than 5%
                         //check for variance
                         boolean isAllowed = RecipeUtility.isVarianceGood(varianceThresholdPercentage, conversionData.getSourceUnitData().getQuantity(), conversionData.getTargetUnitData().getQuantity(), targetUnitData.getQuantity(), sourceUnitData.getQuantity());
-                        if (isAllowed) {
+                        if (isAllowed) { //if variance is below the tolerance level
                             ConversionLine conversionEntry = new ConversionLine(targetUnitData, sourceUnitData);
                             targetToSourceUnits.add(conversionEntry);
-                        } else {
+                        } else { //variance exceeded the tolerance level
                             return false;
                         }
                     } else {
                         ConversionLine conversionEntry = new ConversionLine(targetUnitData, sourceUnitData);
                         targetToSourceUnits.add(conversionEntry);
                     }
+                    // Store the given data as a path in the graph : Node_b --> Node_a : END
                 }
                 lineNo++;
             }
@@ -157,25 +173,34 @@ public class RecipeBook implements RecipeInterface {
         }
 
 
+        //Store the unit conversion data as _Node a_ --> _Node b_
         UnitConversionData abConversionData = new UnitConversionData(sourceMeasurementParams, targetMeasurementParams, sourceToTargetUnits);
+
+        //Store the unit conversion data as _Node b_ --> _Node a_
         UnitConversionData baConversionData = new UnitConversionData(targetMeasurementParams, sourceMeasurementParams, targetToSourceUnits);
+
+        // path : _Node a_ --> _Node b_
         GraphNode oneWayNode = new GraphNode(targetMeasurementParams.getSystemName(), abConversionData);
+
+        // path : _Node b_ --> _Node a_
         GraphNode otherWayNode = new GraphNode(sourceMeasurementParams.getSystemName(), baConversionData);
 
         if (adjacencyList.get(sourceMeasurementParams.getSystemName()) != null) {
-            //key exists
+            //If the key already exists in the graph
             adjacencyList.get(sourceMeasurementParams.getSystemName()).add(oneWayNode);
         } else {
-            //new entry
+            //No such node exists with the given measurement system
             ArrayList<GraphNode> graphNode = new ArrayList<>();
             graphNode.add(oneWayNode);
             adjacencyList.put(sourceMeasurementParams.getSystemName(), graphNode);
         }
 
-        //----------- symmetrical insertion as this is an undirected graph
+        //----------- symmetrical insertion as this is an undirected graph --------------
         if (adjacencyList.get(targetMeasurementParams.getSystemName()) != null) {
+            //If the key already exists in the graph
             adjacencyList.get(targetMeasurementParams.getSystemName()).add(otherWayNode);
         } else {
+            //No such node exists with the given measurement system
             ArrayList<GraphNode> graphNode = new ArrayList<>();
             graphNode.add(otherWayNode);
             adjacencyList.put(targetMeasurementParams.getSystemName(), graphNode);
@@ -193,6 +218,7 @@ public class RecipeBook implements RecipeInterface {
     @Override
     public Boolean recipe(String originalSystem, BufferedReader recipeContent) {
 
+        // if the original system value is null or empty string - which is invalid
         if (originalSystem == null) return false;
         if (originalSystem.length() == 0) return false;
 
@@ -206,12 +232,15 @@ public class RecipeBook implements RecipeInterface {
 
         try {
             while ((line = recipeContent.readLine()) != null) {
+                //if clause to check if there are blank lines in the file
                 if (line.length() == 0 || line.equals("\n") || line.equals("\t") || line.equals("\b") || line.equals("\r")) continue;
+
+
                 if (!titleRead) {
                     titleRead = true;
                     recipeTitle = RecipeUtility.normalizeString(line); //todo: must be unique
-
                 } else if (!ingredientsRead) {
+                    //A separate block to read ingredients till a blank line is encountered. Assuming there are no blank lines in between ingredients
                     do {
                         if (line.length() == 0 || line.equals("\n") || line.equals("\t") || line.equals("\b") || line.equals("\r")) {
                             ingredientsRead = true;
@@ -229,29 +258,38 @@ public class RecipeBook implements RecipeInterface {
                         String name = "";
                         int index = 2;
                         if (ingredient[0].contains("/")) {
-                            //case 2: <i> <fr> \t <u> \t <name>
+                            // The case where the quantity is given as a mixed fraction
+                            //<i> <fr> \t <u> \t <name>
                             String[] fraction = ingredient[0].split(" ");
-                            Integer a = Integer.valueOf(fraction[0]);
+                            Integer a = Integer.valueOf(fraction[0]); //todo: when 1/2 is given no int before !?
 
                             if (a < 0) return false;
 
+                            //case when the quantity is given as a fraction
                             String[] numeratorDenominator = fraction[1].split("/");
                             Integer b = Integer.valueOf(numeratorDenominator[0]);
                             Integer c = Integer.valueOf(numeratorDenominator[1]);
 
                             if (b == 0 || c == 0) return false;
 
+                            //convert the mixed fraction to a decimal
                             quantity = (1.0 * (a * c + b)) / c;
                         } else {
-                            //case 1: <i> <u> <name>
+                            // The case where the quantity is given as an Integer
+                            //<i> <u> <name>
                             quantity = Double.parseDouble(ingredient[0]);
                         }
                         if (quantity <= 0) return false;
                         units = ingredient[1];
+                        //append the name to a string variable
                         for(int i = index ; i < ingredient.length ; i++) name += ingredient[i] + " ";
 
+                        //store the processed <quantity> <units> <name> in the Ingredient object
                         formattedIngredient = new Ingredient(quantity, units, name);
+
+                        //set the given representation of the quantity to the ingredient
                         formattedIngredient.setQuantityRepresentation(quantityRepresentation);
+
                         recipeIngredients.add(formattedIngredient);
                     } while ((line = recipeContent.readLine()) != null);
                 } else if (!instructionsRead) {
@@ -260,11 +298,17 @@ public class RecipeBook implements RecipeInterface {
                 }
             }
 
+            //Creating a RecipeBookContent object to hold all the information processed about the Recipe
             RecipeBookContent currentRecipe = new RecipeBookContent(RecipeUtility.normalizeString(originalSystem), recipeTitle, recipeIngredients, instructions);
+
+            //store the RecipeBookContent object in the recipes hashmap
             recipes.put(recipeTitle, currentRecipe);
         } catch (IOException | ArrayIndexOutOfBoundsException e) {
+            //return false if the Recipe is not read successfully
             return false;
         }
+
+        //return true if the Recipe is read successfully
         return true;
     }
 
@@ -283,6 +327,7 @@ public class RecipeBook implements RecipeInterface {
     @Override
     public int convert(String recipeName, String targetSystem, double scaleFactor, PrintWriter convertedRecipe) {
 
+        //data validation for the given function parameters
         if (targetSystem == null) return 2;
         if (targetSystem.length() == 0) return 2;
         if (scaleFactor <= 0.0) return 2;
@@ -295,16 +340,22 @@ public class RecipeBook implements RecipeInterface {
 
         boolean isConversionAboveVarianceLimit = false;
         String sourceSystem;
+
+        // check if a recipe exists with the given name
         if (recipes.get(normalisedRecipeName) != null) {
             sourceSystem = recipes.get(normalisedRecipeName).getGivenSystemName();
+            //if the recipe name is stored as null or empty string
             if (sourceSystem == null || sourceSystem.length() == 0) return 2;
         } else {
+            //the given recipe does not exist in the RecipeBook
             return 2;
         }
 
+        // if the target measurement system is same as the original system
         if (sourceSystem.equals(normalisedTargetSystem)) {
             RecipeBookContent scaledRecipe = new RecipeBookContent(recipes.get(normalisedRecipeName));
             if (scaleFactor != 1.0) {
+                // scale the quantities
                 MeasurementSystemParams msp = adjacencyList.get(recipes.get(normalisedRecipeName).getGivenSystemName()).get(0).getConversionData().getSourceMeasurementParams();
                 for(Ingredient ingredient: scaledRecipe.getRecipeCopy().getIngredients()) {
                     double quantity = ingredient.getQuantity();
@@ -314,7 +365,11 @@ public class RecipeBook implements RecipeInterface {
             }
             String title = scaledRecipe.getRecipeCopy().getTitle();
             scaledRecipe.getRecipeCopy().setTitle(title + " (" + targetSystem + ")");
+
+            // write the scaled recipe to a file via PrintWriter
             RecipeUtility.writeConvertedRecipeToPrintWriter(scaledRecipe.getRecipeCopy(), convertedRecipe);
+
+            //return 0 to denote successful conversion
             return 0;
         }
 
@@ -322,13 +377,16 @@ public class RecipeBook implements RecipeInterface {
         ArrayList<Ingredient> ingredientsOutput = new ArrayList<>();
 
         UnitConversionData conversionNodeData = null;
+
         //check if path exists (with no hop or 1-hop)
+        //traverse through the adjacent nodes of the given measurement system node
         for(GraphNode node : adjacencyList.get(sourceSystem)) {
             if (node.getSystemName().equals(normalisedTargetSystem)) {
                 path.add(node);
                 conversionNodeData = node.getConversionData();
                 break;
             }
+            //traverse the edges of the target nodes of the outer loop's graph node
             for(GraphNode oneHopNode: adjacencyList.get(node.getSystemName())) {
                 if (oneHopNode.getSystemName().equals(normalisedTargetSystem)) {
                     path.add(node);
@@ -338,10 +396,12 @@ public class RecipeBook implements RecipeInterface {
             }
         }
 
+        // no path exists to target system
         if (path.size() < 1) {
             return 2;
         }
 
+        // when there's 1-hop possible conversion
         if (path.size() == 2) {
             //1 hop
             GraphNode a = path.get(0);
@@ -349,8 +409,11 @@ public class RecipeBook implements RecipeInterface {
             ArrayList<ConversionLine> sourceToTargetUnits = new ArrayList<>();
             UnitData src;
             UnitData target;
+            //create the conversion data from source system to target system via the intermediate system
+            // Node_a --> Node_b --> Node_c
             for(ConversionLine col1: a.getConversionData().getSourceToTargetUnits()) {
                 for(ConversionLine col2: b.getConversionData().getSourceToTargetUnits()) {
+                    // find common units in the target system of Node_a and source of Node_b and compute the Node_c's target value
                     if (col1.getTargetUnitData().getUnitName().equals(col2.getSourceUnitData().getUnitName())) {
                         double newSrcQuantity = col1.getSourceUnitData().getQuantity() * col2.getSourceUnitData().getQuantity() / col1.getTargetUnitData().getQuantity();
                         String newSrcName = col1.getSourceUnitData().getUnitName();
@@ -365,6 +428,8 @@ public class RecipeBook implements RecipeInterface {
                     }
                 }
             }
+
+            //create a new conversion data directly from source to target via the intermediate node
             conversionNodeData = new UnitConversionData(a.getConversionData().getSourceMeasurementParams(), b.getConversionData().getTargetMeasurementParams(), sourceToTargetUnits);
         }
 
@@ -372,15 +437,15 @@ public class RecipeBook implements RecipeInterface {
 
         if (currentRecipe == null) return 2;
 
-        //step 1 : scale ingredients
-        if (scaleFactor != 1.0) {
+        //scale ingredients
+        if (scaleFactor >= 1.0) {
             for(int i = 0 ; i < currentRecipe.getIngredients().size() ; i++) {
                 double currentQuantity = currentRecipe.getIngredients().get(i).getQuantity();
                 currentRecipe.getIngredients().get(i).setQuantity(scaleFactor * currentQuantity);
             }
         }
 
-        //step 2 :
+        //Use the conversion data extracted _directly (if 0-hop) or computed (when there's 1-hop)_ to convert the recipe from source to target system
         if (conversionNodeData != null) {
             for(int i = 0 ; i < currentRecipe.getIngredients().size() ; i++) {
                 Ingredient currentIngredient = currentRecipe.getIngredients().get(i);
@@ -392,19 +457,30 @@ public class RecipeBook implements RecipeInterface {
                 for(ConversionLine conversion: conversionNodeData.getSourceToTargetUnits()) {
                     if (conversion.getSourceUnitData().getUnitName().equals(currentIngredientUnit)) {
                         //compute the conversion
+
+                        //find the equivalent amount in the target system
                         double targetUnitQuantity = (currentIngredient.getQuantity() * conversion.getTargetUnitData().getQuantity())/conversion.getSourceUnitData().getQuantity();
+
+                        //store it as a possible unit in the target system
                         Ingredient potentialUnit = new Ingredient(targetUnitQuantity, conversion.getTargetUnitData().getUnitName(), currentIngredient.getName());
+
+                        //a variable whose sum is used to identify if all the possible quantities have a zero integer
                         roundedSumOfQuantities += Math.floor(targetUnitQuantity);
+
                         boolean isVarianceAllowed = RecipeUtility.isVarianceGood(varianceThresholdPercentage, conversion.getSourceUnitData().getQuantity(), conversion.getTargetUnitData().getQuantity(), currentIngredient.getQuantity(), targetUnitQuantity);
+
+                        //store if the variance under tolerance level as metadata with the ingredient
                         potentialUnit.setVarianceAllowed(isVarianceAllowed);
                         potentialTargetUnits.add(potentialUnit);
                         doesConversionExistsForUnit = true;
                     }
                 }
 
+                // if there's no conversion of a unit from source to target system.
                 if (!doesConversionExistsForUnit) {
                     return 2;
                 }
+
                 Ingredient finalIngredient = null;
                 if (roundedSumOfQuantities == 0.0) {
                     //all zeroes, so choose largest fraction
@@ -444,9 +520,13 @@ public class RecipeBook implements RecipeInterface {
         RecipeBookContent targetRecipe = recipes.get(normalisedRecipeName);
         RecipeBookContent output = new RecipeBookContent(targetSystem, recipeName + " (" + targetSystem + ")", ingredientsOutput, targetRecipe.getInstructions());
 
+        // write the converted recipe to a file
         RecipeUtility.writeConvertedRecipeToPrintWriter(output, convertedRecipe);
 
+        // if the variance of few converted units are above tolerance level
         if (isConversionAboveVarianceLimit) return 1;
+
+        // if the variance of all the converted units are under tolerance level
         return 0;
     }
 
