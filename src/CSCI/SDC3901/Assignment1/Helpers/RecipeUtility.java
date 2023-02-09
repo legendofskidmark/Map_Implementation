@@ -41,6 +41,14 @@ public class RecipeUtility {
         double minRange = 0.0;
         double maxRange = 0.0;
 
+        /*
+        This is a top-down approach to compute the variance.
+        We are taking the allowed tolerance level of variance to compute the allowed range of quantities.
+        The quantity in the question is then checked if it falls in this range.
+        If yes, true is returned
+        else false is returned.
+         */
+
         double xFactor = (existingSize2 * 1.0)/size2;
 
         double conversionAsPerFact = xFactor * size1;

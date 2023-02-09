@@ -126,7 +126,7 @@ public class RecipeBook implements RecipeInterface {
                         }
                     }
 
-                    if (conversionData != null) { //todo: assumption -> even if we have multiple same unit entries only the first is taken as truth even if the below ones are less than 5%
+                    if (conversionData != null) {
                         //check for variance
                         boolean isAllowed = RecipeUtility.isVarianceGood(varianceThresholdPercentage, conversionData.getSourceUnitData().getQuantity(), conversionData.getTargetUnitData().getQuantity(), sourceUnitData.getQuantity(), targetUnitData.getQuantity());
                         if (isAllowed) {
@@ -151,7 +151,7 @@ public class RecipeBook implements RecipeInterface {
                         }
                     }
 
-                    if (conversionData != null) { //todo: assumption -> even if we have multiple same unit entries only the first is taken as truth even if the below ones are less than 5%
+                    if (conversionData != null) {
                         //check for variance
                         boolean isAllowed = RecipeUtility.isVarianceGood(varianceThresholdPercentage, conversionData.getSourceUnitData().getQuantity(), conversionData.getTargetUnitData().getQuantity(), targetUnitData.getQuantity(), sourceUnitData.getQuantity());
                         if (isAllowed) { //if variance is below the tolerance level
@@ -238,7 +238,7 @@ public class RecipeBook implements RecipeInterface {
 
                 if (!titleRead) {
                     titleRead = true;
-                    recipeTitle = RecipeUtility.normalizeString(line); //todo: must be unique
+                    recipeTitle = RecipeUtility.normalizeString(line);
                 } else if (!ingredientsRead) {
                     //A separate block to read ingredients till a blank line is encountered. Assuming there are no blank lines in between ingredients
                     do {
@@ -247,7 +247,7 @@ public class RecipeBook implements RecipeInterface {
                             break;
                         }
                         String[] ingredient = line.split("\t");
-                        if (ingredient.length < 3) { //todo: handle "1 egg" case
+                        if (ingredient.length < 3) {
                             return false;
                         }
 
@@ -261,7 +261,7 @@ public class RecipeBook implements RecipeInterface {
                             // The case where the quantity is given as a mixed fraction
                             //<i> <fr> \t <u> \t <name>
                             String[] fraction = ingredient[0].split(" ");
-                            Integer a = Integer.valueOf(fraction[0]); //todo: when 1/2 is given no int before !?
+                            Integer a = Integer.valueOf(fraction[0]);
 
                             if (a < 0) return false;
 
@@ -433,6 +433,11 @@ public class RecipeBook implements RecipeInterface {
             conversionNodeData = new UnitConversionData(a.getConversionData().getSourceMeasurementParams(), b.getConversionData().getTargetMeasurementParams(), sourceToTargetUnits);
         }
 
+        if (conversionNodeData.getSourceToTargetUnits().size() == 0) {
+            //this might be the case where after the interpolation we dont have any conversion units mapping from source to target, then the conversion is not possible
+            return 2;
+        }
+
         RecipeBookContent currentRecipe = recipes.get(normalisedRecipeName);
 
         if (currentRecipe == null) return 2;
@@ -445,7 +450,7 @@ public class RecipeBook implements RecipeInterface {
             }
         }
 
-        //Use the conversion data extracted _directly (if 0-hop) or computed (when there's 1-hop)_ to convert the recipe from source to target system
+        //Use the conversion data extracted directly (if 0-hop) or computed (when there's 1-hop) to convert the recipe from source to target system
         if (conversionNodeData != null) {
             for(int i = 0 ; i < currentRecipe.getIngredients().size() ; i++) {
                 Ingredient currentIngredient = currentRecipe.getIngredients().get(i);
