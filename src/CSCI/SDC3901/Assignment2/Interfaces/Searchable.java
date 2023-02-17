@@ -6,6 +6,6 @@ public interface Searchable {
     boolean find(String key);
     boolean remove(String key);
     int size();
-//    boolean rebalance();
-//    boolean rebalanceValue(String key);
+    boolean rebalance();
+    boolean rebalanceValue(String key);
 }
