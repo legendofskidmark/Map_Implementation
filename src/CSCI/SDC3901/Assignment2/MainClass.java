@@ -1,6 +1,6 @@
 package CSCI.SDC3901.Assignment2;
 
-public class BoonMain {
+public class MainClass {
 
     public static void main(String[] args) {
 
