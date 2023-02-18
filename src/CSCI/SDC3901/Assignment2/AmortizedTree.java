@@ -171,7 +171,7 @@ public class AmortizedTree implements Searchable, TreeDebug {
             int queueTopPointer = 0;
 
             // assuming array of TreeNode as Queue and "queueTopPointer" will always point to the first element to be dequeued from the queue.
-            TreeNode[] myQueue = new TreeNode[100000000];
+            TreeNode[] myQueue = new TreeNode[100000000]; // an arbitrary large number taken as the max size of the queue
             myQueue[queueArrayIndex] = newRootCopy;
 
             currentCompleteBSTNodeCount--;
@@ -179,7 +179,7 @@ public class AmortizedTree implements Searchable, TreeDebug {
             // construct a complete BST with total number of nodes required when merging unbalanced tree and array
             while (currentCompleteBSTNodeCount > 0 && myQueue[queueTopPointer] != null) {
                 newRootCopy = myQueue[queueTopPointer];
-                newRootCopy.setLeft(new TreeNode(String.valueOf(currentCompleteBSTNodeCount)));
+                newRootCopy.setLeft(new TreeNode(String.valueOf(currentCompleteBSTNodeCount))); // just added the current count for the debugging purposes
                 currentCompleteBSTNodeCount--;
                 if (currentCompleteBSTNodeCount == 0) break;
                 queueArrayIndex++;
