@@ -145,54 +145,58 @@ public class AmortizedTree implements Searchable, TreeDebug {
     @Override
     public boolean rebalance() {
 
-        int targetCompleteBSTSize = size();
+        try {
+            int targetCompleteBSTSize = size();
 
-        // tree is empty
-        if (targetCompleteBSTSize == 0) return true; //todo: true/false for empty tree
+            // tree is empty
+            if (targetCompleteBSTSize == 0) return false; //todo: document this
 
-        TreeNode newRoot = new TreeNode("");
-        TreeNode newRootCopy = newRoot;
+            TreeNode newRoot = new TreeNode("");
+            TreeNode newRootCopy = newRoot;
 
-        int currentCompleteBSTNodeCount = targetCompleteBSTSize;
+            int currentCompleteBSTNodeCount = targetCompleteBSTSize;
 
-        int queueArrayIndex = 0;
-        int queueTopPointer = 0;
+            int queueArrayIndex = 0;
+            int queueTopPointer = 0;
 
-        // assuming array of TreeNode as Queue and "queueTopPointer" will always point to the first element to be dequeued from the queue.
-        TreeNode[] myQueue = new TreeNode[100000000];
-        myQueue[queueArrayIndex] = newRootCopy;
+            // assuming array of TreeNode as Queue and "queueTopPointer" will always point to the first element to be dequeued from the queue.
+            TreeNode[] myQueue = new TreeNode[100000000];
+            myQueue[queueArrayIndex] = newRootCopy;
 
-        currentCompleteBSTNodeCount--;
-
-        // construct a complete BST with total number of nodes required when merging unbalanced tree and array
-        while(currentCompleteBSTNodeCount > 0 && myQueue[queueTopPointer] != null) {
-            newRootCopy = myQueue[queueTopPointer];
-            newRootCopy.setLeft(new TreeNode(String.valueOf(currentCompleteBSTNodeCount)));
             currentCompleteBSTNodeCount--;
-            if (currentCompleteBSTNodeCount == 0) break;
-            queueArrayIndex++;
-            myQueue[queueArrayIndex] = newRootCopy.getLeft();
-            newRootCopy.setRight(new TreeNode(String.valueOf(currentCompleteBSTNodeCount)));
-            currentCompleteBSTNodeCount--;
-            if (currentCompleteBSTNodeCount == 0) break;
-            queueArrayIndex++;
-            myQueue[queueArrayIndex] = newRootCopy.getRight();
 
-            queueTopPointer++;
+            // construct a complete BST with total number of nodes required when merging unbalanced tree and array
+            while (currentCompleteBSTNodeCount > 0 && myQueue[queueTopPointer] != null) {
+                newRootCopy = myQueue[queueTopPointer];
+                newRootCopy.setLeft(new TreeNode(String.valueOf(currentCompleteBSTNodeCount)));
+                currentCompleteBSTNodeCount--;
+                if (currentCompleteBSTNodeCount == 0) break;
+                queueArrayIndex++;
+                myQueue[queueArrayIndex] = newRootCopy.getLeft();
+                newRootCopy.setRight(new TreeNode(String.valueOf(currentCompleteBSTNodeCount)));
+                currentCompleteBSTNodeCount--;
+                if (currentCompleteBSTNodeCount == 0) break;
+                queueArrayIndex++;
+                myQueue[queueArrayIndex] = newRootCopy.getRight();
+
+                queueTopPointer++;
+            }
+
+            // A complete BST structure is ready, now copy values to Complete BST from bottom up so that the BST property is retained
+            String[] allValuesOfAmortizedTree = getAllValuesInAmortizedTree(targetCompleteBSTSize);
+            InsertElementsInInorderFashion(allValuesOfAmortizedTree, newRoot);
+
+            // reset the index variables
+            reBalanceIndex = 0;
+
+            // assign the newly rebalanced to the root
+            root = newRoot;
+            resetParamsAfterRebalancing(allValuesOfAmortizedTree);
+
+            return true;
+        } catch (Exception e) {
+            return false;
         }
-
-        // A complete BST structure is ready, now copy values to Complete BST from bottom up so that the BST property is retained
-        String[] allValuesOfAmortizedTree = getAllValuesInAmortizedTree(targetCompleteBSTSize);
-        InsertElementsInInorderFashion(allValuesOfAmortizedTree, newRoot);
-
-        // reset the index variables
-        reBalanceIndex = 0;
-
-        // assign the newly rebalanced to the root
-        root = newRoot;
-        resetParamsAfterRebalancing(allValuesOfAmortizedTree);
-
-        return true;
     }
 
     // Insert values into an already structured Complete BST in an inorder fashion
@@ -207,47 +211,70 @@ public class AmortizedTree implements Searchable, TreeDebug {
 
     @Override
     public boolean rebalanceValue(String key) {
-        //todo: testcase handling
+        try {
+            // input validation
+            if (key == null) return false;
+            if (key.isEmpty()) return false;
+            if (size() == 0) {
+                insert(root, key);
+                return true;
+            }
 
-        // input validation
-        if (key == null) return false;
-        if (key.isEmpty()) return false;
-        if (size() == 0) return false;
+            // if the given key is already the root of the tree
+            if (root.getKey().compareToIgnoreCase(key) == 0) return true;
 
-        // if a node is not in the tree and in the array
-        if (findInTree(key, root) == null && indexOfElement(key) == -1) return false;
+            TreeNode node = findInTree(key, root);
+            int indexOfElem = indexOfElement(key);
 
-        int targetCompleteBSTSize = size();
+            // if a node is not in the tree and in the array
+            if (node == null && indexOfElem == -1) {
+                // insert into the tree
+                insert(root, key);
+                // call rebalance again to make it root
+                return rebalanceValue(key);
+            } else if (node == null) {
+                // element is in array
+                insert(root, key);
+                return rebalanceValue(key);
+            } else {
+                // element is in the tree
 
-        if (targetCompleteBSTSize == 0) return false;
+                // get all values in the tree and store it in array
+                String[] treeElements = getNodesOfUnbalanacedTree();
 
-        // get all values in the tree and the array and store it in array
-        String[] allValuesOfAmortizedTree = getAllValuesInAmortizedTree(targetCompleteBSTSize);
+                // delete the 'new root value' from the array
+                int i = 0;
+                for (; i < treeElements.length; i++) {
+                    if (treeElements[i].compareToIgnoreCase(key) == 0) break;
+                }
 
-        // delete the new root value from the array
-        int i = 0;
-        for( ; i < allValuesOfAmortizedTree.length ; i++) {
-            if (allValuesOfAmortizedTree[i].compareToIgnoreCase(key) == 0) break;
+                for (; i + 1 < treeElements.length; i++)
+                    treeElements[i] = treeElements[i + 1];
+
+                orderedIndex = 0;
+
+                int[] orderToBeInserted = new int[treeElements.length - 1];
+
+                // get the order to be inserted to mitigate imbalances in the tree
+                orderOfIndiciesToBeAdded(0, treeElements.length - 2, orderToBeInserted);
+
+                TreeNode newRoot = new TreeNode(key);
+                root = newRoot;
+
+                treeSize = 1;
+
+                for (i = 0; i < orderToBeInserted.length; i++) {
+                    root = insert(root, treeElements[orderToBeInserted[i]]);
+                }
+
+                increaseArraySize();
+                resetArrayParameters();
+                return true;
+            }
+        } catch (Exception e) {
+            return false;
         }
 
-        for( ; i+1 < allValuesOfAmortizedTree.length ; i++) allValuesOfAmortizedTree[i] = allValuesOfAmortizedTree[i+1];
-
-        orderedIndex = 0;
-
-        int[] orderToBeInserted = new int[allValuesOfAmortizedTree.length - 1];
-
-        // get the order to be inserted to mitigate imbalances in the tree
-        orderOfIndiciesToBeAdded(0, allValuesOfAmortizedTree.length - 2, orderToBeInserted);
-
-        TreeNode newRoot = new TreeNode(key);
-        root = newRoot;
-
-        for(i = 0 ; i < orderToBeInserted.length ; i++) {
-            root = insert(root, allValuesOfAmortizedTree[orderToBeInserted[i]]);
-        }
-
-        resetParamsAfterRebalancing(allValuesOfAmortizedTree);
-        return true;
     }
 
     private void resetParamsAfterRebalancing(String[] allValuesOfAmortizedTree) {
@@ -257,6 +284,21 @@ public class AmortizedTree implements Searchable, TreeDebug {
         resetArrayParameters();
     }
 
+
+    private String[] getNodesOfUnbalanacedTree() {
+        String treeValueDepthsStr = printTree();
+
+        String[] treeElements = new String[treeSize];
+        if (treeValueDepthsStr != null && !treeValueDepthsStr.isEmpty()) {
+            String[] valuesInTree = treeValueDepthsStr.split("\n");
+            for (int j = 0; j < valuesInTree.length; j++) {
+                treeElements[j] = valuesInTree[j].split(" ")[0];
+            }
+        }
+
+        Arrays.sort(treeElements);
+        return treeElements;
+    }
 
     // Returns all the values in the Amortized tree
     private String[] getAllValuesInAmortizedTree(int targetCompleteBSTSize) {
@@ -425,12 +467,12 @@ public class AmortizedTree implements Searchable, TreeDebug {
         if (root == null) {
             root = new TreeNode(key);
             treeSize++;
-            // as soon as an element is added in the tree, check if we have to resize the array
+            // as soon as an element is added in the tree, check if we have to resize the array and delete the element if its already in the array
             int indexInArray = indexOfElement(key);
             if (indexInArray != -1) {
                 deleteElementAtIndex(indexInArray);
-                increaseArraySize();
             }
+            increaseArraySize();
             return root;
         }
 
@@ -448,59 +490,68 @@ public class AmortizedTree implements Searchable, TreeDebug {
 
     @Override
     public String printTree() {
-
-        //todo: return null in case of error, like for empty tree ?
-        treeMetaData = new NodeMetaData[treeSize];
-        printTreeStr = "";
-        treeMetaDataIndex = 0;
-        printTreeHelper(root, 1);
-        for(int i = 0 ; i < treeMetaDataIndex ; i++) {
-            printTreeStr += treeMetaData[i].getKey() + " " + treeMetaData[i].getDepth() + "\n";
+        try {
+            treeMetaData = new NodeMetaData[treeSize];
+            printTreeStr = "";
+            treeMetaDataIndex = 0;
+            printTreeHelper(root, 1);
+            for (int i = 0; i < treeMetaDataIndex; i++) {
+                printTreeStr += treeMetaData[i].getKey() + " " + treeMetaData[i].getDepth() + "\n"; //todo: document this
+            }
+            //reset the index
+            treeMetaDataIndex = 0;
+            return printTreeStr;
+        } catch (Exception e) {
+            return null;
         }
-        //reset the index
-        treeMetaDataIndex = 0;
-        return printTreeStr;
     }
 
     @Override
     public String[] awaitingInsertion() {
-        //todo: return null, when array is empty (size 0) or when some or all elements are null ?
-        String[] keysCopy = keysArray.clone();
-        Arrays.sort(keysCopy, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                if (o1 == null && o2 == null) {
-                    return 0;
-                }
-                if (o1 == null) {
-                    return 1;
-                }
-                if (o2 == null) {
-                    return -1;
-                }
-                return o1.compareTo(o2);
-            }});
+        //todo: document that we are returning array with nulls as well
 
-        return keysCopy; //todo: clarification from Prof
+        try {
+            String[] keysCopy = keysArray.clone();
+            Arrays.sort(keysCopy, new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    if (o1 == null && o2 == null) {
+                        return 0;
+                    }
+                    if (o1 == null) {
+                        return 1;
+                    }
+                    if (o2 == null) {
+                        return -1;
+                    }
+                    return o1.compareTo(o2);
+                }
+            });
+            return keysCopy; //todo: clarification from Prof
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     @Override
     public String[] treeValues() {
-        //todo: return null, when ?
-        treeMetaData = new NodeMetaData[treeSize];
-        String[] result = new String[treeSize];
-        treeMetaDataIndex = 0;
-        printTreeHelper(root, 1);
-        for(int i = 0 ; i < treeMetaDataIndex ; i++) {
-            result[i] = treeMetaData[i].getKey();
+        try {
+            treeMetaData = new NodeMetaData[treeSize];
+            String[] result = new String[treeSize];
+            treeMetaDataIndex = 0;
+            printTreeHelper(root, 1);
+            for (int i = 0; i < treeMetaDataIndex; i++) {
+                result[i] = treeMetaData[i].getKey();
+            }
+            treeMetaDataIndex = 0;
+            return result;
+        } catch (Exception e) {
+            return null;
         }
-        treeMetaDataIndex = 0;
-        return result;
     }
 
     @Override
     public int depth(String key) {
-
         if (key == null) return size() + DEPTH_NOT_FOUND_FACTOR;
         if (key.isEmpty()) return size() + DEPTH_NOT_FOUND_FACTOR;
         int depth = depthHelper(root, key, 1);
