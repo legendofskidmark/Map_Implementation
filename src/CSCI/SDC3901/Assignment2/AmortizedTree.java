@@ -38,100 +38,111 @@ public class AmortizedTree implements Searchable, TreeDebug {
     @Override
     public boolean add(String key) {
 
-        // input validation
-        if (key == null) return false;
-        if (key.isEmpty()) return false;
-        if (findInTree(key, root) != null) return false;
+        try {
+            // input validation
+            if (key == null) return false;
+            if (key.isEmpty()) return false;
+            if (findInTree(key, root) != null) return false;
 
-        orderedIndex = 0;
+            orderedIndex = 0;
 
-        // if the array has space to hold the incoming element
-        if (arrayIndex < keysArray.length) {
-            if (indexOfElement(key) == -1) {
+            // if the array has space to hold the incoming element
+            if (arrayIndex < keysArray.length) {
+                if (indexOfElement(key) == -1) {
+                    keysArray[arrayIndex] = key;
+                    incrementArrayIndex();
+                } else {
+                    return false;
+                }
+                // if the array has no space left, then we are emptying the current array elements by adding them into the tree in an efficient order
+                // which makes the tree less unbalanced
+            } else if (arrayIndex == keysArray.length) {
+                sortArray();
+
+                // having a copy of the array of elements so that we can modify the actual size of the array and not worry about indices and mis-indexing the elements
+                String[] keysCopy = keysArray.clone();
+                int[] orderedIndices = new int[keysCopy.length];
+
+                // returns the order in which we have to insert the array elements into tree
+                orderOfIndiciesToBeAdded(0, arrayIndex - 1, orderedIndices);
+
+                //insert the elements in the order taken from "orderOfIndiciesToBeAdded()"
+                for (int i = 0; i < orderedIndices.length; i++) {
+                    root = insert(root, keysCopy[orderedIndices[i]]);
+                }
+
+                // reset the array index pointers and nullify the new resized array
+                resetArrayParameters();
+
+                //insert the incoming element into the array
                 keysArray[arrayIndex] = key;
                 incrementArrayIndex();
-            } else {
+            }
+
+            // if we have an error while adding any node, this flag is going to be turned true.
+            if (insertionError) {
+                //reset to its original state for next addition check
+                insertionError = false;
                 return false;
             }
-            // if the array has no space left, then we are emptying the current array elements by adding them into the tree in an efficient order
-            // which makes the tree less unbalanced
-        } else if (arrayIndex == keysArray.length) {
-            sortArray();
-
-            // having a copy of the array of elements so that we can modify the actual size of the array and not worry about indices and mis-indexing the elements
-            String[] keysCopy = keysArray.clone();
-            int[] orderedIndices = new int[keysCopy.length];
-
-            // returns the order in which we have to insert the array elements into tree
-            orderOfIndiciesToBeAdded(0, arrayIndex - 1, orderedIndices);
-
-            //insert the elements in the order taken from "orderOfIndiciesToBeAdded()"
-            for(int i = 0 ; i < orderedIndices.length ; i++) {
-                root = insert(root, keysCopy[orderedIndices[i]]);
-            }
-
-            // reset the array index pointers and nullify the new resized array
-            resetArrayParameters();
-
-            //insert the incoming element into the array
-            keysArray[arrayIndex] = key;
-            incrementArrayIndex();
-        }
-
-        // if we have an error while adding any node, this flag is going to be turned true.
-        if (insertionError) {
-            //reset to its original state for next addition check
-            insertionError = false;
+            return true;
+        } catch (Exception e) {
             return false;
         }
-        return true;
     }
 
     @Override
     public boolean find(String key) {
-        // input validation
-        if (key == null) return false;
-        if (key.isEmpty()) return false;
+        try {
+            // input validation
+            if (key == null) return false;
+            if (key.isEmpty()) return false;
 
-        // check if the element is in the array
-        int index = indexOfElement(key);
+            // check if the element is in the array
+            int index = indexOfElement(key);
 
-        // check if the element is in the tree
-        TreeNode node = findInTree(key, root);
+            // check if the element is in the tree
+            TreeNode node = findInTree(key, root);
 
 
-        // if its in either of them, return true
-        if (index != -1 || node != null) return true;
+            // if its in either of them, return true
+            if (index != -1 || node != null) return true;
 
-        //else it means element is not found
-        return false;
+            //else it means element is not found
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public boolean remove(String key) {
 
-        // input validation
-        if (key == null) return false;
-        if (key.isEmpty()) return false;
+        try {
+            // input validation
+            if (key == null) return false;
+            if (key.isEmpty()) return false;
 
-        // if the element is in array, we will remove it
-        if(removeFromArray(key)) {
-            return true;
+            // if the element is in array, we will remove it
+            if (removeFromArray(key)) {
+                return true;
+            }
+
+            // else if the element is in the tree, remove from there
+            root = removeFromTree(root, key);
+
+            if (removedNodeFromTree) {
+                // A node is removed from the tree, so decrease the tree size
+                treeSize--;
+
+                // reset the boolean flags for the next removal method calls
+                removedNodeFromTree = false;
+                return true;
+            }
+            return false;
+        }catch (Exception e) {
+            return false;
         }
-
-        // else if the element is in the tree, remove from there
-        root = removeFromTree(root, key);
-
-        if (removedNodeFromTree) {
-            // A node is removed from the tree, so decrease the tree size
-            treeSize--;
-
-            // reset the boolean flags for the next removal method calls
-            removedNodeFromTree = false;
-            return true;
-        }
-
-        return false;
     }
 
     @Override
@@ -149,7 +160,7 @@ public class AmortizedTree implements Searchable, TreeDebug {
             int targetCompleteBSTSize = size();
 
             // tree is empty
-            if (targetCompleteBSTSize == 0) return false; //todo: document this
+            if (targetCompleteBSTSize == 0) return false;
 
             TreeNode newRoot = new TreeNode("");
             TreeNode newRootCopy = newRoot;
@@ -267,7 +278,7 @@ public class AmortizedTree implements Searchable, TreeDebug {
                     root = insert(root, treeElements[orderToBeInserted[i]]);
                 }
 
-                increaseArraySize();
+                resizeArrayIfNeeded();
                 resetArrayParameters();
                 return true;
             }
@@ -280,7 +291,7 @@ public class AmortizedTree implements Searchable, TreeDebug {
     private void resetParamsAfterRebalancing(String[] allValuesOfAmortizedTree) {
         // reset the count and index variables after performing any operation on the amortized tree
         treeSize = allValuesOfAmortizedTree.length;
-        increaseArraySize();
+        resizeArrayIfNeeded();
         resetArrayParameters();
     }
 
@@ -302,27 +313,31 @@ public class AmortizedTree implements Searchable, TreeDebug {
 
     // Returns all the values in the Amortized tree
     private String[] getAllValuesInAmortizedTree(int targetCompleteBSTSize) {
-        String[] allValuesOfAmortizedTree = new String[targetCompleteBSTSize];
+        try {
+            String[] allValuesOfAmortizedTree = new String[targetCompleteBSTSize];
 
-        String[] awaitingInsertionValues = awaitingInsertion();
+            String[] awaitingInsertionValues = awaitingInsertion();
 
-        int i = 0;
-        for (; i < awaitingInsertionValues.length && awaitingInsertionValues[i] != null; i++) {
-            allValuesOfAmortizedTree[i] = awaitingInsertionValues[i];
-        }
-
-        String treeValueDepthsStr = printTree();
-
-        if (treeValueDepthsStr != null && !treeValueDepthsStr.isEmpty()) {
-            String[] valuesInTree = treeValueDepthsStr.split("\n");
-            for (int j = 0; j < valuesInTree.length; j++) {
-                allValuesOfAmortizedTree[i] = valuesInTree[j].split(" ")[0];
-                i++;
+            int i = 0;
+            for (; i < awaitingInsertionValues.length && awaitingInsertionValues[i] != null; i++) {
+                allValuesOfAmortizedTree[i] = awaitingInsertionValues[i];
             }
-        }
 
-        Arrays.sort(allValuesOfAmortizedTree);
-        return allValuesOfAmortizedTree;
+            String treeValueDepthsStr = printTree();
+
+            if (treeValueDepthsStr != null && !treeValueDepthsStr.isEmpty()) {
+                String[] valuesInTree = treeValueDepthsStr.split("\n");
+                for (int j = 0; j < valuesInTree.length; j++) {
+                    allValuesOfAmortizedTree[i] = valuesInTree[j].split(" ")[0];
+                    i++;
+                }
+            }
+
+            Arrays.sort(allValuesOfAmortizedTree);
+            return allValuesOfAmortizedTree;
+        } catch (Exception e) {
+            return new String[0];
+        }
     }
 
     private boolean removeFromArray(String key) {
@@ -416,7 +431,7 @@ public class AmortizedTree implements Searchable, TreeDebug {
             }});
     }
 
-    private void increaseArraySize() {
+    private void resizeArrayIfNeeded() {
         int newSize = (int)Math.ceil(Math.log(treeSize) / Math.log(2)); //src : https://www.geeksforgeeks.org/how-to-calculate-log-base-2-of-an-integer-in-java/
 
         // if the size is less than 3, then the array size must be 1.
@@ -468,11 +483,8 @@ public class AmortizedTree implements Searchable, TreeDebug {
             root = new TreeNode(key);
             treeSize++;
             // as soon as an element is added in the tree, check if we have to resize the array and delete the element if its already in the array
-            int indexInArray = indexOfElement(key);
-            if (indexInArray != -1) {
-                deleteElementAtIndex(indexInArray);
-            }
-            increaseArraySize();
+            removeFromArray(key);
+            resizeArrayIfNeeded();
             return root;
         }
 
@@ -496,7 +508,7 @@ public class AmortizedTree implements Searchable, TreeDebug {
             treeMetaDataIndex = 0;
             printTreeHelper(root, 1);
             for (int i = 0; i < treeMetaDataIndex; i++) {
-                printTreeStr += treeMetaData[i].getKey() + " " + treeMetaData[i].getDepth() + "\n"; //todo: document this
+                printTreeStr += treeMetaData[i].getKey() + " " + treeMetaData[i].getDepth() + "\n";
             }
             //reset the index
             treeMetaDataIndex = 0;
@@ -508,8 +520,6 @@ public class AmortizedTree implements Searchable, TreeDebug {
 
     @Override
     public String[] awaitingInsertion() {
-        //todo: document that we are returning array with nulls as well
-
         try {
             String[] keysCopy = keysArray.clone();
             Arrays.sort(keysCopy, new Comparator<String>() {
