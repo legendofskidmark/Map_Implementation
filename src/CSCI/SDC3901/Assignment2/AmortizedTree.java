@@ -348,7 +348,7 @@ public class AmortizedTree implements Searchable, TreeDebug {
         //loop through selecting mid and call insert on each element
 
         if (start <= end) {
-            int mid = (int) Math.ceil((start + end) * 1.0/2.0);
+            int mid = (int) Math.floor((start + end) * 1.0/2.0);
             orderToBeAdded[orderedIndex] = mid;
             orderedIndex++;
             orderOfIndiciesToBeAdded(start, mid - 1, orderToBeAdded);

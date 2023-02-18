@@ -36,68 +36,17 @@ public class BoonMain {
 //        tree.add("zebra");
 //        tree.add("you");
 
-        tree.add("1");
-        tree.add("2");
-        tree.add("3");
-        tree.add("4");
-        tree.add("5");
+        for(int i = 1 ; i <= 25 ; i++) {
+            tree.add(String.valueOf(i));
+        }
 
-        tree.add("6");
-        tree.add("7");
-        tree.add("8");
-        tree.add("9");
-        tree.add("10");
-        tree.add("11");
-        tree.add("12");
-        tree.add("13");
-        tree.add("14");
-
-        tree.add("15");
-        tree.add("16");
-        tree.add("17");
-        tree.add("18");
-        tree.add("19");
-        tree.add("20");
-        tree.add("21");
-        tree.add("22");
-        tree.add("23");
-        tree.add("24");
-        tree.add("25");
-        tree.add("26");
-        tree.add("27");
-        tree.add("28");
-//
-//        System.out.println(tree.depth("1"));
-//
-//        System.out.println(tree.depth("10"));
-//
-//        System.out.println(tree.depth("9"));
-//        System.out.println(tree.depth("2400"));
-
-
-        tree.rebalanceValue("28");
         System.out.println(tree.printTree());
 
-
-        System.out.println("-------------");
-        tree.rebalanceValue("1");
-        System.out.println(tree.printTree());
-
-        System.out.println("-------------");
-        tree.rebalanceValue("9");
-        System.out.println(tree.printTree());
-
-        System.out.println("-------------");
-        tree.rebalanceValue("24");
-        System.out.println(tree.printTree());
-        System.out.println("-------------");
-
-        tree.rebalanceValue("24");
-        System.out.println(tree.printTree());
+        printMy(tree.awaitingInsertion());
     }
 
     static void printMy(String [] arr) {
         for(int i = 0 ; i < arr.length ; i++) System.out.println(arr[i]);
-        System.out.println("------------");
+//        System.out.println("------------");
     }
 }
